@@ -1,12 +1,12 @@
 /* ************************************************************************** */
 /*                                                                            */
 /*                                                        :::      ::::::::   */
-/*   server.c                                           :+:      :+:    :+:   */
+/*   server_bonus.c                                     :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
 /*   By: mbelouar <mbelouar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
-/*   Created: 2023/02/13 16:01:03 by mbelouar          #+#    #+#             */
-/*   Updated: 2023/02/19 14:46:45 by mbelouar         ###   ########.fr       */
+/*   Created: 2023/02/15 19:26:47 by mbelouar          #+#    #+#             */
+/*   Updated: 2023/02/19 16:05:12 by mbelouar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -27,10 +27,12 @@ int	ft_pow2(int base, int puiss)
 	return (pow);
 }
 
-char	create_char(int *tab, int i)
+void	print_char(int *tab, siginfo_t *info)
 {
-	char	c;
+	char		c;
+	int			i;
 
+	i = 8;
 	c = 0;
 	while (i)
 	{
@@ -38,15 +40,18 @@ char	create_char(int *tab, int i)
 			c += ft_pow2(2, 8 - i);
 		i--;
 	}
-	return (c);
+	if (!c)
+		kill(info->si_pid, SIGUSR1);
+	else
+		write (1, &c, 1);
 }
 
 void	handle_sig(int sig, siginfo_t *info, void *message)
 {
-	static int	stock_bits[8];
-	static int	i;
-	static int	clientpid;
-	char		c;
+	static int		stock_bits[32];
+	static int		i;
+	static int		len;
+	static pid_t	clientpid;
 
 	(void) message;
 	if (clientpid != info->si_pid)
@@ -54,12 +59,18 @@ void	handle_sig(int sig, siginfo_t *info, void *message)
 		clientpid = info->si_pid;
 		i = 0;
 	}
+	if (len == 0)
+		len = 1;
 	stock_bits[i++] = (sig == SIGUSR1);
-	if (i == 8)
+	while (i == 4 && stock_bits[0] == 1 && stock_bits[len] == 1)
+		len++;
+	if (i == 8 * len)
 	{
-		c = create_char(stock_bits, i);
-		write (1, &c, 1);
+		i = -1;
+		while (++i < len)
+			print_char(&stock_bits[i * 8], info);
 		i = 0;
+		len = 1;
 	}
 }
 
@@ -68,7 +79,7 @@ int	main(int ac, char **av)
 	int					pid;
 	struct sigaction	sigact;
 
-	(void)av;
+	(void) av;
 	sigact.sa_sigaction = &handle_sig;
 	sigact.sa_flags = SA_SIGINFO;
 	if (ac != 1)

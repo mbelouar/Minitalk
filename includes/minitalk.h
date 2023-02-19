@@ -6,7 +6,7 @@
 /*   By: mbelouar <mbelouar@student.42.fr>          +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2023/02/13 16:13:04 by mbelouar          #+#    #+#             */
-/*   Updated: 2023/02/14 23:33:50 by mbelouar         ###   ########.fr       */
+/*   Updated: 2023/02/19 15:01:51 by mbelouar         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,11 +18,10 @@
 # include <unistd.h>
 # include <signal.h>
 
-# define	EXIT_SUCCESS	0
-# define	EXIT_FAILED		1
-
-int     ft_atoi(const char *str);
-int     ft_pow2(int base, int puiss);
-void    handle_sig(int sig, siginfo_t *info, void *message);
+void	handle_sig(int sig, siginfo_t *info, void *message);
+char	create_char(int *tab, int i);
+int		ft_strlen(const char *s);
+int		ft_atoi(const char *str);
+int		ft_pow2(int base, int puiss);
 
 #endif
